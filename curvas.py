@@ -61,11 +61,9 @@ for col in num_cols:
     df[col] = df[col].apply(lambda x: x.replace(
         ',', '.').strip() if type(x) == str else x).astype(float)
 
-
 # Create a dictionary to store the items in the tree
 
 items = {}
-df.sort_values(by="I_n", ascending=False, inplace=True)
 red = Red()
 for i, row in df.iterrows():
     if row["term_curva"] == 'C' and not pd.isna(row["term_nombre"]):
@@ -96,6 +94,14 @@ for i, row in df.iterrows():
     protecction.add_child(cable)
     cable.add_child(leaf)
     items.update({row["nombre"]: leaf})
+
+# associate each item with its parent
+
+for i, row in df.iterrows():
+    child = items[row["nombre"]]
+    while not isinstance(child, Proteccion):
+        child = child.parent
+    protecction = child
 
     if row["alimentador"] not in [None, np.nan]:
         items[row["alimentador"]].add_child(protecction)
