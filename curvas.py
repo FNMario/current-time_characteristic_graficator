@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -107,6 +108,11 @@ for i, row in df.iterrows():
         items[row["alimentador"]].add_child(protecction)
     else:
         red.add_child(protecction)
+
+# create folder to store the plots
+
+if not os.path.exists("./curvas"):
+    os.mkdir("./curvas")
 
 # plot the curves
 
