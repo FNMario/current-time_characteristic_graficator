@@ -228,24 +228,35 @@ def create_plot(items: dict, name: str):
 
 
 def run():
+    print('Cargando datos...')
     url = get_url()
     df = get_data(url)
     items = create_tree(df)
-    response = input("¿Deseas crear todas las graficas? (Y/n): ")
-    if response in ['n', 'N']:
-        while True:
+    while True:
+        response = input("""MENU
+                        1. Crear todas las graficas
+                        2. Crear una grafica
+                        3. refrescar datos
+                        9. Salir""")
+        if response == 1:
+            create_all_plots(df, items)
+        elif response == 2:
             name = input(
-                "¿Que grafica deseas crear? [dejar en blanco para salir]")
+                "Nombre de la barra/carga a graficar: ")
             if name == '':
                 return
             if name not in items:
-                print("La grafica no existe")
+                print("La barra/carga no existe")
             else:
                 create_plot(items, name)
-    elif response in ['y', 'Y', '']:
-        create_all_plots(df, items)
-    else:
-        print("Respuesta invalida")
+        elif response == 3:
+            print('Cargando datos...')
+            df = get_data(url)
+            items = create_tree(df)
+        elif response == 9:
+            return
+        else:
+            print("Respuesta invalida")
 
 
 if __name__ == "__main__":
