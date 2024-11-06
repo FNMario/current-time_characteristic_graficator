@@ -234,13 +234,14 @@ def run():
     items = create_tree(df)
     while True:
         response = input("""MENU
-                        1. Crear todas las graficas
-                        2. Crear una grafica
-                        3. refrescar datos
-                        9. Salir""")
-        if response == 1:
+1. Crear todas las graficas
+2. Crear una grafica
+3. refrescar datos
+9. Salir
+""")
+        if response == '1':
             create_all_plots(df, items)
-        elif response == 2:
+        elif response == '2':
             name = input(
                 "Nombre de la barra/carga a graficar: ")
             if name == '':
@@ -249,11 +250,11 @@ def run():
                 print("La barra/carga no existe")
             else:
                 create_plot(items, name)
-        elif response == 3:
+        elif response == '3':
             print('Cargando datos...')
             df = get_data(url)
             items = create_tree(df)
-        elif response == 9:
+        elif response == '9':
             return
         else:
             print("Respuesta invalida")
