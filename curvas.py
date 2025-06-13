@@ -193,7 +193,7 @@ def create_all_plots(df: pd.DataFrame, items: dict):
             print(e)
 
 
-def create_plot(items: dict, name: str):
+def create_plot(items: dict, name: str, show: bool = False):
     """
     Creates a plot for the item with the given name.
 
@@ -205,6 +205,8 @@ def create_plot(items: dict, name: str):
         Dictionary with the items to plot.
     name : str
         Name of the item to plot.
+    show : bool, optional
+        If True, the plot is shown. The default is False.
 
     Returns
     -------
@@ -220,8 +222,9 @@ def create_plot(items: dict, name: str):
         fig = items[name].create_plot()
         fig.get_figure().savefig(
             f"./curvas/current-time_characteristic_{name}.png", bbox_inches='tight')
-        fig.show()
-        input("Presione enter para continuar...")
+        if show:
+            fig.show()
+            input("Presione enter para continuar...")
         plt.close(fig)
     except Exception as e:
         print(e)
@@ -236,7 +239,8 @@ def run():
         response = input("""MENU
 1. Crear todas las graficas
 2. Crear una grafica
-3. refrescar datos
+3. Refrescar datos
+4. Crear varias graficas
 9. Salir
 """)
         if response == '1':
@@ -249,11 +253,24 @@ def run():
             if name not in items:
                 print("La barra/carga no existe")
             else:
-                create_plot(items, name)
+                create_plot(items, name, show=True)
         elif response == '3':
             print('Cargando datos...')
             df = get_data(url)
             items = create_tree(df)
+        elif response == '4':
+            name = input(
+                "Graficar barras/cargas que comiencen con: ")
+            if name == '':
+                return
+            if name not in items:
+                print("La barra/carga no existe")
+            else:
+                cargas = [item for item in items if item.startswith(name)]
+                length = len(cargas)
+                for i, name in enumerate(cargas):
+                    create_plot(items, name)
+                    print(f"fig {i+1}/{length} - {name} - {(i+1)*100/length:.1f}%")
         elif response == '9':
             return
         else:
