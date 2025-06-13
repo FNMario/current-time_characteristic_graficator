@@ -4,9 +4,15 @@ from typing import Optional
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
-
 # Se crea un estructura de arbol que representa un diagrama electrico unifilar
 # Primero se crea la clase nodo
+
+
+def round_to_text(number):
+    if number % 1 < 1e-2:
+        return f"{number:.0f}"
+    else:
+        return f"{number}"
 
 
 def lighten_color(color, amount=-0.5):
@@ -55,17 +61,49 @@ class Nodo:
             self.child = child
             child.parent = self
 
-    def __str__(self):
-        data = {
-            "name": self.name,
-            "parent": self.parent.name if self.parent else None,
-        }
+    def get_children(self):
         if hasattr(self, "children"):
-            data["children"] = [str(c) for c in self.children]
+            return self.children
         elif hasattr(self, "child"):
-            data["child"] = self.child.name
+            return [self.child]
 
-        return str(data)
+    def __repr__(self):
+        return str(self.name)
+
+    def __str__(self):
+        def print_tree(node: Nodo, text: str, level=0):
+            if node is None:
+                return ""
+            if isinstance(node, (Carga, Barra)):
+                text = text + f"    {'┃   ' * level}┣━ {node.name}\n"
+                level += 1
+            children = node.get_children()
+            if children is None:
+                return text
+            for child in children:
+                text = print_tree(child, text, level)
+            return text
+
+        parents = list()
+        child = self
+        while not isinstance(child, Red):
+            child = child.parent
+            if isinstance(child, (Carga, Barra)):
+                parents.append(child)
+        red = child
+
+        text = ""
+        tabs = len(parents)
+
+        # Add parents to list
+        for tab, item in enumerate(parents):
+            text = f"    {'┃   ' *(tabs-tab-1)}┣━ {item.name}\n" + text
+
+        text = f"=={red.name}\n" + text
+
+        text = print_tree(self, text, tabs)
+
+        return text
 
 
 @dataclass
@@ -146,7 +184,7 @@ class Fusible():
         }
 
         ax.loglog(fusibles[self.I_f]['I'], fusibles[self.I_f]
-                  ['t'], color=lighten_color(color, 0.75), linestyle='-.', label=f'{self.name} {self.I_f}A')
+                  ['t'], color=lighten_color(color, 0.75), linestyle='-.', label=f'{self.name}   {round_to_text(self.I_f)}A')
 
 
 @dataclass
@@ -181,7 +219,7 @@ class Termica():
                 t = [10e6, self.t_r*self.I_i*30, self.t_r, self.t_i, self.t_i]
 
         ax.loglog(I_termica, t, color=lighten_color(color, 0.75), linestyle='--',
-                  label=f'{self.name} {self.I_t}A')
+                  label=f'{self.name}   {round_to_text(self.I_t)}A')
 
 
 @dataclass
@@ -256,9 +294,9 @@ class Conductor(Nodo):
             if I_adm[i] < self.I_adm:
                 I_adm[i] = self.I_adm
         ax.loglog(I_adm, t, color=lighten_color(color, 0.5), linestyle='-',
-                  label=f'{self.name} {self.S}mm²')
+                  label=f'{self.name}   {round_to_text(self.S)}mm²')
         ax.plot([self.I_n, self.I_n], [0.001, 1e6], color=color, linestyle=':',
-                label=f'I_n={self.I_n}A')
+                label=f'I_n={round_to_text(self.I_n)}A')
 
 
 # Ejercicio Ema pag 328:
